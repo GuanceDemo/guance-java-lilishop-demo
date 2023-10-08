@@ -74,7 +74,7 @@ spec:
     spec:
       initContainers:
         - name: init-mysql
-          image: busybox:1.28
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-busybox:1.28
           command:
             [
               "sh",
@@ -82,7 +82,7 @@ spec:
               "until nslookup mysql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mysql; sleep 2; done",
             ]
       containers:
-        - image: nacos/nacos-server:v2.2.0
+        - image: pubrepo.jiagouyun.com/demo/demo-lilishop-nacos:v2.2.0
           # resources:
           #   requests:
           #     memory: "2Gi"

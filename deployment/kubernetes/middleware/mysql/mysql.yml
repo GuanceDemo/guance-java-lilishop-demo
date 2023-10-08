@@ -83,7 +83,7 @@ spec:
               value: lilishop
             - name: TZ
               value: Asia/Shanghai
-          image: mysql:8.0.33
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-mysql:8.0.33
           name: mysql
           ports:
             - name: mysql

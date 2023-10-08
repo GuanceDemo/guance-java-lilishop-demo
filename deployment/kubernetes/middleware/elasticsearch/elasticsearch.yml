@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
         - name: elasticsearch
-          image: elasticsearch:7.17.5
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-elasticsearch:7.17.5
           env:
             - name: cluster.name
               value: elasticsearch

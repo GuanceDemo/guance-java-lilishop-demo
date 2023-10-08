@@ -48,7 +48,7 @@ spec:
     spec:
       initContainers:
         - name: init-mysql
-          image: busybox:1.28
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-busybox:1.28
           command:
             [
               "sh",
@@ -59,7 +59,7 @@ spec:
         - env:
             - name: PARAMS
               value: --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?Unicode=true&characterEncoding=UTF-8  --spring.datasource.username=root --spring.datasource.password=lilishop --server.port=9001
-          image: xuxueli/xxl-job-admin:2.3.0
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-xxl-job:2.3.0
           name: xxl-job
           ports:
             - name: xxl9001

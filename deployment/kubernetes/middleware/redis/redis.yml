@@ -57,7 +57,7 @@ spec:
             - "yes"
             - --protected-mode
             - "no"
-          image: redis:7.0.11
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-redis:7.0.11
           name: redis
           ports:
             - name: redis

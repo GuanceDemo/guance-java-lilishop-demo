@@ -117,7 +117,7 @@ spec:
     spec:
       containers:
         - name: rocketmq
-          image: apache/rocketmq:4.9.6
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-rocketmq:4.9.6
           env:
             - name: TZ
               value: Asia/Shanghai
@@ -134,7 +134,7 @@ spec:
             - name: vol-store
               mountPath: /home/rocketmq/store
         - name: rmqbroker
-          image: apache/rocketmq:4.9.6
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-rocketmq:4.9.6
           env:
             - name: TZ
               value: Asia/Shanghai
@@ -156,7 +156,7 @@ spec:
               name: rocketmq-config-claim
               subPath: broker.conf
         - name: rmqbroker-slave
-          image: apache/rocketmq:4.9.6
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-rocketmq:4.9.6
           env:
             - name: TZ
               value: Asia/Shanghai

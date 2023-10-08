@@ -48,7 +48,7 @@ spec:
         lilishop.service: logstash
     spec:
       containers:
-        - image: logstash:7.17.5
+        - image: pubrepo.jiagouyun.com/demo/demo-lilishop-logstash:7.17.5
           name: logstash
           ports:
             - name: logstash4560

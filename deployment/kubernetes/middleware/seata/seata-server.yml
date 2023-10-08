@@ -127,7 +127,7 @@ spec:
     spec:
       containers:
         - name: seata-server
-          image: docker.io/seataio/seata-server:1.5.2
+          image: pubrepo.jiagouyun.com/demo/demo-lilishop-seata:1.5.2
           imagePullPolicy: IfNotPresent
           env:
             - name: SEATA_ENV
