@@ -1,0 +1,468 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lilishop-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: gateway
+    app.kubernetes.io/instance: api
+    app.kubernetes.io/version: "4.2.4.1"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  type: NodePort
+  ports:
+    - name: "8888"
+      nodePort: 30888
+      port: 8888
+      targetPort: gateway8888
+  selector:
+    lilishop.service: gateway
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: im
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: im
+    app.kubernetes.io/instance: api
+    app.kubernetes.io/version: "4.2.4.1"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  type: NodePort
+  ports:
+    - name: "11130"
+      nodePort: 31130
+      port: 11130
+      targetPort: im11130
+  selector:
+    lilishop.service: gateway
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: consumer-service
+    app.kubernetes.io/instance: consumer
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: consumer
+  template:
+    metadata:
+      labels:
+        lilishop.service: consumer
+    spec:
+      containers:
+        - image: 461249983/consumer-1.0.3:1.0.3
+          name: consumer
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distribution-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: distribution-api-service
+    app.kubernetes.io/instance: distribution-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: distribution-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: distribution-api
+    spec:
+      containers:
+        - image: 461249983/distribution-service-1.0.3:1.0.3
+          name: distribution-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: order-api-service
+    app.kubernetes.io/instance: order-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: order-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: order-api
+    spec:
+      containers:
+        - image: 461249983/order-service-1.0.3:1.0.3
+          name: order-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: system-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: system-api-service
+    app.kubernetes.io/instance: system-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: system-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: system-api
+    spec:
+      containers:
+        - image: 461249983/system-service-1.0.3:1.0.3
+          name: system-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+          volumeMounts:
+            - name: crt-data
+              mountPath: /root/crt
+      volumes:
+        - name: crt-data
+          hostPath:
+            path: /root/crt
+            type: Directory
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: statistics-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: statistics-api-service
+    app.kubernetes.io/instance: statistics-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: statistics-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: statistics-api
+    spec:
+      containers:
+        - image: 461249983/statistics-service-1.0.3:1.0.3
+          name: statistics-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promotion-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: promotion-api-service
+    app.kubernetes.io/instance: promotion-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: promotion-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: promotion-api
+    spec:
+      containers:
+        - image: 461249983/promotion-service-1.0.3:1.0.3
+          name: promotion-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: payment-api-service
+    app.kubernetes.io/instance: payment-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: payment-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: payment-api
+    spec:
+      containers:
+        - image: 461249983/payment-service-1.0.3:1.0.3
+          name: payment-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+          volumeMounts:
+            - name: crt-data
+              mountPath: /root/crt
+      volumes:
+        - name: crt-data
+          hostPath:
+            path: /root/crt
+            type: Directory
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: goods-api-service
+    app.kubernetes.io/instance: goods-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: goods-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: goods-api
+    spec:
+      containers:
+        - image: 461249983/goods-service-1.0.3:1.0.3
+          name: goods-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: member-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: member-api-service
+    app.kubernetes.io/instance: member-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: member-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: member-api
+    spec:
+      containers:
+        - image: 461249983/member-service-1.0.3:1.0.3
+          name: member-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+      restartPolicy: Always
+  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broadcast-api
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: broadcast-api-service
+    app.kubernetes.io/instance: broadcast-api
+    app.kubernetes.io/version: "1.0.3"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: broadcast-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: broadcast-api
+    spec:
+      containers:
+        - image: 461249983/broadcast-service-1.0.3:1.0.3
+          name: broadcast-api
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+      restartPolicy: Always
+  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: im
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: im-service
+    app.kubernetes.io/instance: im-api
+    app.kubernetes.io/version: "4.2.4.1"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: im
+  template:
+    metadata:
+      labels:
+        lilishop.service: im
+    spec:
+      containers:
+        - image: 461249983/im-service-1.0.3:1.0.3
+          name: im
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+          ports:
+            - name: im11130
+              containerPort: 11130
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: lilishop-service
+  labels:
+    app.kubernetes.io/name: gateway-service
+    app.kubernetes.io/instance: gateway
+    app.kubernetes.io/version: "4.2.4.1"
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: lilishop
+    tier: "api-service"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: gateway
+  template:
+    metadata:
+      labels:
+        lilishop.service: gateway
+    spec:
+      containers:
+        - image: 461249983/gateway-1.0.3:1.0.3
+          name: gateway
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx1g -Xmn128m --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED
+          ports:
+            - name: gateway8888
+              containerPort: 8888
+      restartPolicy: Always

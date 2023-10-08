@@ -1,0 +1,103 @@
+--- # ---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: es-data-holder-01
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/root/docker/kubernetes/middleware/elasticsearch/data"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: es-data-holder-02
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/root/docker/kubernetes/middleware/elasticsearch/data"
+---
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: quickstart
+spec:
+  version: 8.1.2
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true # 关闭ssl
+    service:
+      spec:
+        type: NodePort
+        ports:
+          - name: https
+            nodePort: 30920 # 公开端口
+            port: 9200
+            protocol: TCP
+            targetPort: 9200
+  nodeSets:
+    - name: masters-nodes
+      count: 1
+      config:
+        node.roles: ["master", "data"]
+        xpack.ml.enabled: true
+        node.store.allow_mmap: false
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms500m -Xmx500m
+              resources:
+                requests:
+                  cpu: 0.5
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: manual
+    - name: data-nodes
+      count: 1
+      config:
+        node.roles: ["data", "ingest", "ml", "transform"]
+        xpack.ml.enabled: true
+        node.store.allow_mmap: false
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms500m -Xmx500m
+              resources:
+                requests:
+                  cpu: 0.5
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: manual

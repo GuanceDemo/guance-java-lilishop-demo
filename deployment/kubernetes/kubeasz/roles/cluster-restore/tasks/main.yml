@@ -1,0 +1,30 @@
+- name: 停止ectd 服务
+  service: name=etcd state=stopped
+
+- name: 清除etcd 数据目录
+  file: name={{ ETCD_DATA_DIR }}/member state=absent
+
+- name: 清除 etcd 备份目录
+  file: name={{ cluster_dir }}/backup/etcd-restore state=absent
+  delegate_to: 127.0.0.1 
+  run_once: true
+
+- name: etcd 数据恢复
+  shell: "cd {{ cluster_dir }}/backup && \
+	ETCDCTL_API=3 {{ base_dir }}/bin/etcdctl snapshot restore snapshot.db \
+	 --data-dir={{ cluster_dir }}/backup/etcd-restore"
+  delegate_to: 127.0.0.1
+  run_once: true
+
+- name: 分发恢复文件到 etcd 各个节点
+  copy: src={{ cluster_dir }}/backup/etcd-restore/member dest={{ ETCD_DATA_DIR }}
+
+- name: 重启etcd 服务
+  service: name=etcd state=restarted
+
+- name: 以轮询的方式等待服务同步完成
+  shell: "systemctl is-active etcd.service"
+  register: etcd_status
+  until: '"active" in etcd_status.stdout'
+  retries: 8
+  delay: 8

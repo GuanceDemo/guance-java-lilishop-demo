@@ -1,0 +1,34 @@
+# 离线安装基础系统包
+- name: 准备离线安装包目录
+  file: name=/opt/kube/packages/basic state=directory
+
+- block:
+  - name: 分发{{ ansible_distribution_release }}离线包
+    copy:
+      src: "{{ base_dir }}/down/packages/basic_{{ ansible_distribution_release }}.tar.gz"
+      dest: "/opt/kube/packages/basic/basic_{{ ansible_distribution_release }}.tar.gz"
+
+  # 离线安装包可能需要安装多次才能成功
+  - name: 安装{{ ansible_distribution_release }} 离线包
+    shell: 'cd /opt/kube/packages/basic && tar zxf basic_{{ ansible_distribution_release }}.tar.gz && \
+           dpkg -i *.deb > /tmp/install_basic.log 2>&1'
+    register: install_info
+    until: not install_info.failed
+    retries: 3
+    delay: 1
+  when: 'ansible_distribution in ["Ubuntu","Debian"]' 
+  ignore_errors: true
+
+- block:
+  - name: 分发 basic_centos7 离线包
+    copy:
+      src: "{{ base_dir }}/down/packages/basic_centos7.tar.gz"
+      dest: "/opt/kube/packages/basic/basic_centos7.tar.gz"
+
+  - name: 安装 basic_centos7 离线包
+    shell: 'cd /opt/kube/packages/basic && tar zxf basic_centos7.tar.gz && \
+           rpm -Uvh --force --nodeps *.rpm > /tmp/install_basic.log 2>&1'
+  when:
+  - 'ansible_distribution in ["CentOS","RedHat"]'
+  - 'ansible_distribution_major_version == "7"'
+  ignore_errors: true

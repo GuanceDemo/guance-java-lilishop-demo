@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-service
+  namespace: lilishop-middleware
+  labels:
+    app.kubernetes.io/name: kibana-service
+    app.kubernetes.io/instance: kibana
+    app.kubernetes.io/version: "7.17.5"
+    app.kubernetes.io/component: logging
+    app.kubernetes.io/part-of: lilishop
+    tier : "middleware"
+spec:
+  type: NodePort
+  ports:
+    - name: "5601"
+      port: 5601
+      nodePort: 30601
+      targetPort: kibana5601
+  selector:
+    lilishop.service: kibana
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kibana-config
+  namespace: lilishop-middleware
+  labels:
+    app.kubernetes.io/name: kibana
+    app.kubernetes.io/instance: kibana
+    app.kubernetes.io/version: "7.17.5"
+    app.kubernetes.io/component: logging
+    app.kubernetes.io/part-of: lilishop
+    tier : "middleware"
+data:
+  kibana.yml: |
+    server.name: kibana
+    server.host: "0"
+    elasticsearch.hosts: ["http://elasticsearch:9200"]
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: lilishop-middleware
+  labels:
+    app.kubernetes.io/name: kibana
+    app.kubernetes.io/instance: kibana
+    app.kubernetes.io/version: "7.17.5"
+    app.kubernetes.io/component: logging
+    app.kubernetes.io/part-of: lilishop
+    tier : "middleware"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: kibana
+  template:
+    metadata:
+      labels:
+        lilishop.network/stack: "true"
+        lilishop.service: kibana
+    spec:
+      containers:
+        - image: docker.elastic.co/kibana/kibana:7.17.5
+          name: kibana
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          ports:
+            - name: kibana5601
+              containerPort: 5601
+          volumeMounts:
+            - name: kibana-config-volumes
+              mountPath: /usr/share/kibana/config/kibana.yml
+              subPath: kibana.yml
+      restartPolicy: Always
+      volumes:
+        - name: kibana-config-volumes
+          configMap:
+            name: kibana-config
+            items:
+              - key: kibana.yml
+                path: kibana.yml

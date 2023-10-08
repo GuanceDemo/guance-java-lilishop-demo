@@ -1,0 +1,217 @@
+# 如果你的微服务没有使用docker,那么需要把/etc/rocketmq/broker.conf 配置文件中的brokerIP1=192.168.0.253 这个启用，IP 地址填写 你docker 所在 宿主机的IP ，否则报错
+# 映射本地目录logs权限一定要设置为 777 权限，否则启动不成功
+# https://github.com/foxiswho/docker-rocketmq
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: lilishop-middleware
+  labels:
+    app.kubernetes.io/name: rocketmq-service
+    app.kubernetes.io/instance: rocketmq
+    app.kubernetes.io/version: "4.9.6"
+    app.kubernetes.io/component: mq
+    app.kubernetes.io/part-of: lilishop
+    tier : "middleware"
+  name: rocketmq
+spec:
+  type: NodePort
+  ports:
+    - port: 9876
+      targetPort: 9876
+      nodePort: 30876
+      name: "rmqser"
+    - port: 30911
+      targetPort: 30911
+      nodePort: 30911
+      name: "rmqbroker"
+    - port: 30921
+      targetPort: 30921
+      nodePort: 30921
+      name: "rmqbrokerslave"
+  selector:
+    lilishop.service: rocketmq
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rocketmq-config
+  namespace: lilishop-middleware
+  labels:
+    app.kubernetes.io/name: rocketmq-config
+    app.kubernetes.io/instance: rocketmq
+    app.kubernetes.io/version: "4.9.6"
+    app.kubernetes.io/component: mq
+    app.kubernetes.io/part-of: lilishop
+data:
+  broker.conf: |
+    namesrvAddr=rocketmq.lilishop-middleware.svc.cluster.local:9876
+    brokerClusterName=DefaultCluster
+    brokerName=broker-a
+    brokerId=0
+    deleteWhen=04
+    fileReservedTime=48
+    brokerRole=ASYNC_MASTER
+    flushDiskType=ASYNC_FLUSH
+    brokerIP1=192.168.31.100
+    listenPort=30911
+    autoCreateTopicEnable=true
+    autoCreateSubscriptionGroup=true
+    defaultTopicQueueNums=4
+    diskMaxUsedSpaceRatio=99
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rocketmq-slave-config
+  namespace: lilishop-middleware
+  labels:
+    app.kubernetes.io/name: rocketmq-slave-config
+    app.kubernetes.io/instance: rocketmq
+    app.kubernetes.io/version: "4.9.6"
+    app.kubernetes.io/component: mq
+    app.kubernetes.io/part-of: lilishop
+data:
+  broker-s.conf: |
+    namesrvAddr=rocketmq.lilishop-middleware.svc.cluster.local:9876
+    brokerClusterName=DefaultCluster
+    brokerName=broker-a
+    brokerId=1
+    deleteWhen=04
+    fileReservedTime=48k
+    brokerRole=SLAVE
+    flushDiskType=ASYNC_FLUSH
+    brokerIP1=192.168.31.100
+    listenPort=30921
+    autoCreateTopicEnable=true
+    autoCreateSubscriptionGroup=true
+    defaultTopicQueueNums=4
+    diskMaxUsedSpaceRatio=99
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rocketmq
+  namespace: lilishop-middleware
+  labels:
+    app.kubernetes.io/name: rocketmq-data-pvc
+    app.kubernetes.io/instance: rocketmq
+    app.kubernetes.io/version: "4.9.6"
+    app.kubernetes.io/component: mq
+    app.kubernetes.io/part-of: lilishop
+    tier : "middleware"
+spec:
+  serviceName: rocketmq
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: rocketmq
+  template:
+    metadata:
+      labels:
+        lilishop.service: rocketmq
+    spec:
+      containers:
+        - name: rocketmq
+          image: apache/rocketmq:4.9.6
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPT
+              value: -Duser.home=/home/rocketmq
+            - name: JAVA_OPT_EXT
+              value: -Xms256m -Xmx256m -Xmn128m
+          command: ["sh","mqnamesrv"]
+          ports:
+            - containerPort: 9876
+          volumeMounts:
+            - name: vol-logs
+              mountPath: /home/rocketmq/logs
+            - name: vol-store
+              mountPath: /home/rocketmq/store
+        - name: rmqbroker
+          image: apache/rocketmq:4.9.6
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPT
+              value: -Duser.home=/home/rocketmq
+            - name: JAVA_OPT_EXT
+              value: -Xms256m -Xmx256m -Xmn128m
+          command: ["sh","mqbroker","-c","/etc/rocketmq/broker.conf"]
+          ports:
+            - containerPort: 30909
+            - containerPort: 30911
+            - containerPort: 30912
+          volumeMounts:
+            - name: vol-logs-a
+              mountPath: /home/rocketmq/logs
+            - name: vol-store-a
+              mountPath: /home/rocketmq/store
+            - mountPath: /etc/rocketmq/broker.conf
+              name: rocketmq-config-claim
+              subPath: broker.conf
+        - name: rmqbroker-slave
+          image: apache/rocketmq:4.9.6
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JAVA_OPT
+              value: -Duser.home=/home/rocketmq
+            - name: JAVA_OPT_EXT
+              value: -Xms256m -Xmx256m -Xmn128m
+          command: ["sh","mqbroker","-c","/etc/rocketmq/broker-s.conf"]
+          ports:
+            - containerPort: 30919
+            - containerPort: 30921
+            - containerPort: 30922
+          volumeMounts:
+            - name: vol-logs-as
+              mountPath: /home/rocketmq/logs
+            - name: vol-store-as
+              mountPath: /home/rocketmq/store
+            - mountPath: /etc/rocketmq/broker-s.conf
+              name: rocketmq-slave-config-claim
+              subPath: broker-s.conf
+      restartPolicy: Always
+      volumes:
+        - name: rocketmq-config-claim
+          configMap:
+            name: rocketmq-config
+            items:
+              - key: broker.conf
+                path: broker.conf
+        - name: rocketmq-slave-config-claim
+          configMap:
+            name: rocketmq-slave-config
+            items:
+              - key: broker-s.conf
+                path: broker-s.conf
+        - name: vol-logs
+          hostPath:
+            path: /root/docker/kubernetes/data/middleware/rocketmq/logs
+            type: Directory
+        - name: vol-store
+          hostPath:
+            path: /root/docker/kubernetes/data/middleware/rocketmq/store
+            type: Directory
+        - name: vol-logs-a
+          hostPath:
+            path: /root/docker/kubernetes/data/middleware/rocketmq/logs-a
+            type: Directory
+        - name: vol-store-a
+          hostPath:
+            path: /root/docker/kubernetes/data/middleware/rocketmq/store-a
+            type: Directory
+        - name: vol-logs-as
+          hostPath:
+            path: /root/docker/kubernetes/data/middleware/rocketmq/logs-as
+            type: Directory
+        - name: vol-store-as
+          hostPath:
+            path: /root/docker/kubernetes/data/middleware/rocketmq/store-as
+            type: Directory

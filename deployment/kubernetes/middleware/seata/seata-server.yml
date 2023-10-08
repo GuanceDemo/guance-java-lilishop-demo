@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: seata-server
+  namespace: lilishop-middleware
+  labels:
+    k8s-app: seata-server
+spec:
+  type: NodePort
+  ports:
+    - port: 30891
+      nodePort: 30891
+      name: "8091"
+      targetPort: seata8091
+    - port: 7091
+      nodePort: 30791
+      name: "7091"
+      targetPort: seata7091
+  selector:
+    k8s-app: seata-server
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seata-server-config
+  namespace: lilishop-middleware
+data:
+  registry-dev.conf: |
+    registry {
+        type = "nacos"
+        nacos {
+          serverAddr = "nacos"
+          group = "SEATA_GROUP"
+          namespace = "4b304983-50ff-41cc-985a-dca6c98caad1"
+          username = "nacos"
+          password = "nacos"
+          cluster = "default"
+        }
+    }
+    config {
+      type = "nacos"
+      nacos {
+        serverAddr = "nacos"
+        group = "SEATA_GROUP"
+        namespace = "4b304983-50ff-41cc-985a-dca6c98caad1"
+        username = "nacos"
+        password = "nacos"
+        dataId = "seataServer.properties"
+      }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seata-server-app-config
+  namespace: lilishop-middleware
+data:
+  application.yml: |
+    server:
+      port: 7091
+    spring:
+      application:
+        name: seata-server
+    logging:
+      config: classpath:logback-spring.xml
+      file:
+        path: ${user.home}/logs/seata
+      extend:
+        logstash-appender:
+          destination: 127.0.0.1:4560
+        kafka-appender:
+          bootstrap-servers: 127.0.0.1:9092
+          topic: logback_to_logstash
+    console:
+      user:
+        username: seata
+        password: seata
+    seata:
+      registry:
+        type: nacos
+        nacos:
+          server-addr: nacos.lilishop-middleware:8848
+          group: SEATA_GROUP
+          namespace: 4b304983-50ff-41cc-985a-dca6c98caad1
+          username: nacos
+          password: nacos
+      # Seata 的配置中心为 nacos
+      config:
+        type: nacos
+        nacos:
+          serverAddr: nacos.lilishop-middleware:8848
+          group: SEATA_GROUP
+          dataId: seataServer.properties
+          namespace: 4b304983-50ff-41cc-985a-dca6c98caad1
+          username: nacos
+          password: nacos
+      store:
+        # support: file 、 db 、 redis
+        mode: file
+    #  server:
+    #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
+      security:
+        secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+        tokenValidityInMilliseconds: 1800000
+        ignore:
+          urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seata-server
+  namespace: lilishop-middleware
+  labels:
+    k8s-app: seata-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: seata-server
+  template:
+    metadata:
+      labels:
+        k8s-app: seata-server
+    spec:
+      containers:
+        - name: seata-server
+          image: docker.io/seataio/seata-server:1.5.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SEATA_ENV
+              value: dev
+            - name: SEATA_CONFIG_NAME
+              value: file:/seata-server/resources/registry
+            - name: SEATA_IP
+              value: '192.168.0.100'
+            - name: SEATA_PORT
+              value: '30891'
+          ports:
+            - name: seata8091
+              containerPort: 30891
+            - name: seata7091
+              containerPort: 7091
+          volumeMounts:
+            - name: seata-app-config
+              mountPath: /seata-server/resources/application.yml
+              subPath: application.yml
+            # - name: seata-config
+            #   mountPath: /seata-server/resources/registry-dev.conf
+            #   subPath: registry-dev.conf
+      volumes:
+        - name: seata-config
+          configMap:
+            name: seata-server-config
+        - name: seata-app-config
+          configMap:
+            name: seata-server-app-config

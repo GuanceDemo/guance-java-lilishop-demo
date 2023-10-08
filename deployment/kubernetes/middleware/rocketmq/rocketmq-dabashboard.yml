@@ -1,0 +1,61 @@
+# https://github.com/apache/rocketmq-dashboard
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: rmqdashbaord-service
+    app.kubernetes.io/instance: rmqdashbaord
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: mq
+    app.kubernetes.io/part-of: lilishop
+    tier : "middleware"
+  name: rmqdashbaord
+  namespace: lilishop-middleware
+spec:
+  type: NodePort
+  ports:
+    - name: "8080"
+      nodePort: 30080
+      port: 8080
+      targetPort: rmqdashbaord
+  selector:
+    lilishop.service: rmqdashbaord
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: rmqdashbaord
+    app.kubernetes.io/instance: rmqdashbaord
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: mq
+    app.kubernetes.io/part-of: lilishop
+    tier : "middleware"
+  name: rmqdashbaord
+  namespace: lilishop-middleware
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: rmqdashbaord
+  template:
+    metadata:
+      labels:
+        lilishop.network/rocketmq: "true"
+        lilishop.service: rmqdashbaord
+    spec:
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: -Drocketmq.namesrv.addr=rocketmq:9876
+          image: apacherocketmq/rocketmq-dashboard:1.0.0
+          name: rmqdashbaord
+          ports:
+            - name: rmqdashbaord
+              containerPort: 8080
+          resources: {}
+      restartPolicy: Always
+status: {}
