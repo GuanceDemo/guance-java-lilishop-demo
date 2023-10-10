@@ -39,5 +39,4 @@ jobs:
       - name: Build with Maven
         run: |
          cd ./src/lilishop
-         docker login ${{ vars.DOCKER_REGISTRY }} -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-         mvn clean package docker:build  -DskipTests  -DpushImage
+         mvn clean package docker:build  -DskipTests  -DpushImage  -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }}

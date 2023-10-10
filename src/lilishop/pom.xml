@@ -91,6 +91,8 @@
                 <version>${spotify}</version>
                 <configuration>
                     <imageName>${docker-registry}/demo-lilishop-${project.artifactId}:${revision}.${images-version}</imageName>
+                    <username>${docker.username}</username>
+                    <password>${docker.password}</password>
                     <baseImage>eclipse-temurin:8u382-b05-jre</baseImage>
                     <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
                     <resources>
