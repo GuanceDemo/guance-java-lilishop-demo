@@ -38,8 +38,7 @@ jobs:
           
       - name: Build with Maven
         run: |
-         docker version
-         systemctl status docker
+         mvn --version
          cd ./src/lilishop
 #         sudo apt install containerd
 #         sudo apt install docker.io
