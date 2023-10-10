@@ -22,7 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>
-        <docker-registry>pubrepo.jiagouyun.com/demo</docker-registry>
+        <docker-registry>pubrepo.jiagouyun.com</docker-registry>
         <images-version>1</images-version>
         <alipay-sdk-version>4.22.32.ALL</alipay-sdk-version>
         <mybatis-plus-version>3.5.1</mybatis-plus-version>
@@ -90,7 +90,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${spotify}</version>
                 <configuration>
-                    <imageName>${docker-registry}/demo-lilishop-${project.artifactId}:${revision}.${images-version}</imageName>
+                    <imageName>${docker-registry}/demo/demo-lilishop-${project.artifactId}:${revision}.${images-version}</imageName>
                     <username>${docker.username}</username>
                     <password>${docker.password}</password>
                     <baseImage>eclipse-temurin:8u382-b05-jre</baseImage>
