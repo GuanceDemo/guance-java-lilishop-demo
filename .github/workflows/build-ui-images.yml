@@ -1,0 +1,27 @@
+name: Build and push lilishop ui demo images
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+  workflow_dispatch:
+
+jobs:
+  build_and_push_images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build and push images
+        run: |
+          cd ./src/lilishop-ui
+          docker login pubrepo.jiagouyun.com -u${{ secrets.DOCKER_USERNAME }} -p${{ secrets.DOCKER_PASSWORD }}
+          bash docker-build.sh
