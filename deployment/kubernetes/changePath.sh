@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ORIGIN_PATH=/root/docker/kubernetes
+ORIGIN_PATH=/root/guance-java-lilishop-demo/deployment/kubernetes
 PUB_PATH=$PWD
 PUB_DATA_PATH=$PWD/data
 ORIGIN_DATA_PATH=$ORIGIN_PATH/data
@@ -47,29 +47,6 @@ configData() {
   TMP_PUB_DATA_PATH=` echo $PUB_DATA_PATH$1 | sed 's#\/#\\\/#g'`
   sed -i "s/$TMP_ORIGIN_PATH/$TMP_PUB_DATA_PATH/g" `grep -rl "$ORIGIN_PATH/data$1" ./`
 }
-
-
-echo "请确认当前项目路径$PUB_PATH,需要修改输入【y】,不需要修改输入【n】..."
-read -p "请输入y或n": YES
-if [[ $YES == y ]];then
- read -p "请输入你的当前项目路径": NEW_PATH
- PUB_PATH=$NEW_PATH
-else 
- echo "默认路径，不需要修改..."
-fi
-
-echo $PUB_PATH
-
-echo "请确认中间件数据存储路径$PUB_DATA_PATH,需要修改输入【y】,不需要修改输入【n】..."
-read -p "请输入y或n": YES
-if [[ $YES == y ]];then
- read -p "请输入中间件数据存储路径": NEW_PATH
- PUB_DATA_PATH=$NEW_PATH
-else 
- echo "默认路径，不需要修改..."
-fi
-
-echo $PUB_DATA_PATH
 
 mkdatadir
 
