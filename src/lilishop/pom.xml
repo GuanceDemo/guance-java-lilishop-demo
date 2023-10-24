@@ -92,7 +92,7 @@
                 <configuration>
                     <imageName>${docker-registry}/demo/demo-lilishop-${project.artifactId}:${revision}.${images-version}</imageName>
                     <baseImage>eclipse-temurin:8u382-b05-jre</baseImage>
-                    <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
+                    <entryPoint>["java", "${JAVA_OPTS}", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
                     <resources>
                         <resource>
                             <targetPath>/</targetPath>

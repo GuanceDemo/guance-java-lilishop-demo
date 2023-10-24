@@ -459,7 +459,7 @@ spec:
             - name: TZ
               value: Asia/Shanghai
             - name: JAVA_OPTS
-              value: -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
+              value: -javaagent:/datadog-lib/dd-java-agent.jar -XX:FlightRecorderOptions=stackdepth=256 -Ddd.service=buyer-api  -Ddd.logs.injection=true -Ddd.profiling.enabled=true -Ddd.profiling.ddprof.enabled=true -Ddd.profiling.ddprof.cpu.enabled=true -Ddd.profiling.ddprof.wall.enabled=true -Ddd.profiling.ddprof.alloc.enabled=true -Ddd.profiling.ddprof.liveheap.enabled=true -Ddd.tags=container_host:$(POD_NAME) -Ddd.service.mapping=mysql:lilishop-mysql,redis:lilishop-redis -Ddd.env=env -Ddd.version=4.3.1 -Ddd.agent.port=9529 -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
           ports:
             - name: buyer8888
               containerPort: 8888
@@ -504,7 +504,7 @@ spec:
             - name: TZ
               value: Asia/Shanghai
             - name: JAVA_OPTS
-              value: -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
+              value: -javaagent:/datadog-lib/dd-java-agent.jar -XX:FlightRecorderOptions=stackdepth=256 -Ddd.service=common-api  -Ddd.logs.injection=true -Ddd.profiling.enabled=true -Ddd.profiling.ddprof.enabled=true -Ddd.profiling.ddprof.cpu.enabled=true -Ddd.profiling.ddprof.wall.enabled=true -Ddd.profiling.ddprof.alloc.enabled=true -Ddd.profiling.ddprof.liveheap.enabled=true -Ddd.tags=container_host:$(POD_NAME) -Ddd.service.mapping=mysql:lilishop-mysql,redis:lilishop-redis -Ddd.env=env -Ddd.version=4.3.1 -Ddd.agent.port=9529 -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
           ports:
             - name: common8890
               containerPort: 8890
@@ -549,7 +549,7 @@ spec:
             - name: TZ
               value: Asia/Shanghai
             - name: JAVA_OPTS
-              value: -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
+              value: -javaagent:/datadog-lib/dd-java-agent.jar -XX:FlightRecorderOptions=stackdepth=256 -Ddd.service=seller-api  -Ddd.logs.injection=true -Ddd.profiling.enabled=true -Ddd.profiling.ddprof.enabled=true -Ddd.profiling.ddprof.cpu.enabled=true -Ddd.profiling.ddprof.wall.enabled=true -Ddd.profiling.ddprof.alloc.enabled=true -Ddd.profiling.ddprof.liveheap.enabled=true -Ddd.tags=container_host:$(POD_NAME) -Ddd.service.mapping=mysql:lilishop-mysql,redis:lilishop-redis -Ddd.env=env -Ddd.version=4.3.1 -Ddd.agent.port=9529 -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
           ports:
             - name: seller8889
               containerPort: 8889
@@ -594,7 +594,7 @@ spec:
             - name: TZ
               value: Asia/Shanghai
             - name: JAVA_OPTS
-              value: -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
+              value: -javaagent:/datadog-lib/dd-java-agent.jar -XX:FlightRecorderOptions=stackdepth=256 -Ddd.service=manager-api  -Ddd.logs.injection=true -Ddd.profiling.enabled=true -Ddd.profiling.ddprof.enabled=true -Ddd.profiling.ddprof.cpu.enabled=true -Ddd.profiling.ddprof.wall.enabled=true -Ddd.profiling.ddprof.alloc.enabled=true -Ddd.profiling.ddprof.liveheap.enabled=true -Ddd.tags=container_host:$(POD_NAME) -Ddd.service.mapping=mysql:lilishop-mysql,redis:lilishop-redis -Ddd.env=env -Ddd.version=4.3.1 -Ddd.agent.port=9529 -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
           ports:
             - name: manager8887
               containerPort: 8887
@@ -639,7 +639,7 @@ spec:
             - name: TZ
               value: Asia/Shanghai
             - name: JAVA_OPTS
-              value: -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
+              value: -javaagent:/datadog-lib/dd-java-agent.jar -XX:FlightRecorderOptions=stackdepth=256 -Ddd.service=consumer-api  -Ddd.logs.injection=true -Ddd.profiling.enabled=true -Ddd.profiling.ddprof.enabled=true -Ddd.profiling.ddprof.cpu.enabled=true -Ddd.profiling.ddprof.wall.enabled=true -Ddd.profiling.ddprof.alloc.enabled=true -Ddd.profiling.ddprof.liveheap.enabled=true -Ddd.tags=container_host:$(POD_NAME) -Ddd.service.mapping=mysql:lilishop-mysql,redis:lilishop-redis -Ddd.env=env -Ddd.version=4.3.1 -Ddd.agent.port=9529 -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xms128m -Xmx256m -Xmn128m -Xss256k -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC
           volumeMounts:
             - mountPath: /application.yml
               name: application-yml

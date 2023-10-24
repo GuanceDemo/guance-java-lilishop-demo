@@ -15,7 +15,7 @@ spec:
   ports:
     - name: "9001"
       port: 9001
-      nodePort: 30001
+      nodePort: 30066
       targetPort: xxl9001
   selector:
     lilishop.service: xxl-job
